@@ -5,29 +5,33 @@ import java.nio.file.Path;
 import java.util.HashMap;
 
 public class StatisticalAnalysisService {
-    private static final String ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
-
-    public static void decrypt(String inputPath, String outputPath) throws Exception {
-        String encrypted = Files.readString(Path.of(inputPath));
-        HashMap<Character, Integer> map = new HashMap<>();
-
-        for (char ch : encrypted.toLowerCase().toCharArray()) {
-            if (ALPHABET.indexOf(ch) != -1) {
-                map.put(ch, map.getOrDefault(ch, 0) + 1);
+    
+    private static final String ABC = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    
+    public static void decrypt(String input, String output) throws Exception {
+        decrypt(input, output, 'о');
+    }
+    
+    public static void decrypt(String input, String output, char expected) throws Exception {
+        String text = Files.readString(Path.of(input));
+        var freq = new HashMap<Character, Integer>();
+        
+        for (char ch : text.toLowerCase().toCharArray()) {
+            if (ABC.indexOf(ch) != -1) {
+                freq.put(ch, freq.getOrDefault(ch, 0) + 1);
             }
         }
-
-        char mostPopular = 'о';
+        
+        char most = ' ';
         int max = 0;
-
-        for (char ch : map.keySet()) {
-            if (map.get(ch) > max) {
-                max = map.get(ch);
-                mostPopular = ch;
+        for (var e : freq.entrySet()) {
+            if (e.getValue() > max) {
+                max = e.getValue();
+                most = e.getKey();
             }
         }
-
-        int key = ALPHABET.indexOf(mostPopular) - ALPHABET.indexOf('о');
-        FileService.processFile(inputPath, outputPath, -key);
+        
+        int key = ABC.indexOf(most) - ABC.indexOf(expected);
+        FileService.processFile(input, output, -key);
     }
 }
